@@ -1,137 +1,132 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gallery Images</title>
-
-<style>
-body{
-    font-family:Arial;
-    background:#f4f4f4;
-    padding:30px;
-}
-
-h1{
-    text-align:center;
-}
-
-select{
-    padding:8px;
-    margin-bottom:20px;
-}
-
-.gallery{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
-    gap:20px;
-}
-
-.card{
-    background:white;
-    padding:10px;
-    border-radius:10px;
-    box-shadow:0 5px 15px rgba(0,0,0,0.1);
-}
-
-.card img{
-    width:100%;
-    border-radius:8px;
-}
-
-.url{
-    font-size:12px;
-    word-break:break-all;
-    margin:8px 0;
-}
-
-button{
-    width:100%;
-    padding:8px;
-    border:none;
-    background:#2d89ef;
-    color:white;
-    border-radius:6px;
-    cursor:pointer;
-}
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galeri Foto Wedding</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; }
+        .folder-buttons { margin-bottom: 20px; }
+        .folder-buttons button {
+            padding: 10px 15px; margin-right: 10px; cursor: pointer;
+            border: none; background: #0070f3; color: white; border-radius: 5px;
+        }
+        .folder-buttons button.active { background: #005bb5; font-weight: bold; }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: white; padding: 10px; border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center;
+        }
+        .card img {
+            width: 100%; height: 200px; object-fit: cover; border-radius: 5px;
+        }
+        .copy-btn {
+            margin-top: 10px; padding: 8px; width: 100%; cursor: pointer;
+            border: 1px solid #0070f3; background: white; color: #0070f3;
+            border-radius: 5px; transition: 0.2s;
+        }
+        .copy-btn:hover { background: #0070f3; color: white; }
+    </style>
 </head>
 <body>
 
-<h1>Gallery Images</h1>
+    <h2>Pilih Folder Foto</h2>
+    <div class="folder-buttons" id="folderButtons">
+        </div>
 
-<label>Pilih Folder :</label>
-<select id="folderSelect" onchange="loadImages()">
-<option value="images1">images1</option>
-<option value="images2">images2</option>
-<option value="images3">images3</option>
-</select>
+    <div class="gallery" id="gallery">
+        </div>
 
-<div class="gallery" id="gallery"></div>
+    <script src="data.js"></script>
+    <script>
+        const folderButtonsDiv = document.getElementById('folderButtons');
+        const galleryDiv = document.getElementById('gallery');
+        
+        // Ambil URL dasar web Anda (misal: https://wedding-me-beta.vercel.app)
+        const baseUrl = window.location.origin;
 
-<script>
+        // Fungsi untuk merender tombol folder
+        function initGallery() {
+            const folders = Object.keys(imageData);
+            
+            if (folders.length === 0) {
+                galleryDiv.innerHTML = "<p>Tidak ada data folder yang ditemukan.</p>";
+                return;
+            }
 
-const baseUrl = "https://the-wedding-me.vercel.app/";
+            folders.forEach((folder, index) => {
+                const btn = document.createElement('button');
+                btn.textContent = folder.toUpperCase();
+                btn.onclick = () => loadImages(folder, btn);
+                folderButtonsDiv.appendChild(btn);
 
-/* daftar gambar per folder */
-const folders = {
+                // Load folder pertama secara otomatis saat web dibuka
+                if (index === 0) {
+                    loadImages(folder, btn);
+                }
+            });
+        }
 
-images1: [
-"BNZ_2897.JPG",
-"BNZ_2898.JPG",
-"BNZ_2899.JPG"
-],
+        // Fungsi untuk menampilkan gambar berdasarkan folder yang dipilih
+        function loadImages(folderName, activeBtn) {
+            // Update tampilan tombol aktif
+            document.querySelectorAll('.folder-buttons button').forEach(b => b.classList.remove('active'));
+            if(activeBtn) activeBtn.classList.add('active');
 
-images2: [
-"BNZ_3001.JPG",
-"BNZ_3002.JPG",
-"BNZ_3003.JPG"
-],
+            // Kosongkan galeri
+            galleryDiv.innerHTML = '';
 
-images3: [
-"BNZ_3101.JPG",
-"BNZ_3102.JPG"
-]
+            const images = imageData[folderName];
+            
+            if (images.length === 0) {
+                galleryDiv.innerHTML = "<p>Folder ini kosong.</p>";
+                return;
+            }
 
-};
+            images.forEach(imageName => {
+                // Buat URL lengkap gambar (contoh: https://web.com/images1/foto.jpg)
+                const fullImageUrl = `${baseUrl}/${folderName}/${imageName}`;
 
-function loadImages(){
+                const card = document.createElement('div');
+                card.className = 'card';
 
-const folder = document.getElementById("folderSelect").value;
-const gallery = document.getElementById("gallery");
+                const img = document.createElement('img');
+                img.src = `${folderName}/${imageName}`; // Path relatif untuk preview
+                img.alt = imageName;
+                img.loading = "lazy"; // Biar web tidak berat
 
-gallery.innerHTML = "";
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'copy-btn';
+                copyBtn.textContent = 'Copy URL';
+                
+                // Fitur Copy URL
+                copyBtn.onclick = () => {
+                    navigator.clipboard.writeText(fullImageUrl).then(() => {
+                        copyBtn.textContent = 'Copied!';
+                        copyBtn.style.background = '#28a745';
+                        copyBtn.style.color = 'white';
+                        copyBtn.style.border = '1px solid #28a745';
+                        setTimeout(() => {
+                            copyBtn.textContent = 'Copy URL';
+                            copyBtn.style.background = 'white';
+                            copyBtn.style.color = '#0070f3';
+                            copyBtn.style.border = '1px solid #0070f3';
+                        }, 2000);
+                    });
+                };
 
-folders[folder].forEach(img => {
+                card.appendChild(img);
+                card.appendChild(copyBtn);
+                galleryDiv.appendChild(card);
+            });
+        }
 
-const url = baseUrl + folder + "/" + img;
-
-const card = document.createElement("div");
-card.className = "card";
-
-card.innerHTML = `
-<img src="/${folder}/${img}">
-<div class="url">${url}</div>
-<button onclick="copyUrl('${url}')">Copy URL</button>
-`;
-
-gallery.appendChild(card);
-
-});
-
-}
-
-function copyUrl(url){
-
-navigator.clipboard.writeText(url);
-alert("URL berhasil di copy");
-
-}
-
-loadImages();
-
-</script>
-
+        // Jalankan saat web dimuat
+        initGallery();
+    </script>
 </body>
 </html>
