@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gallery Images</title>
+
+<style>
+body{
+    font-family:Arial;
+    background:#f4f4f4;
+    padding:30px;
+}
+
+h1{
+    text-align:center;
+}
+
+select{
+    padding:8px;
+    margin-bottom:20px;
+}
+
+.gallery{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+    gap:20px;
+}
+
+.card{
+    background:white;
+    padding:10px;
+    border-radius:10px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+.card img{
+    width:100%;
+    border-radius:8px;
+}
+
+.url{
+    font-size:12px;
+    word-break:break-all;
+    margin:8px 0;
+}
+
+button{
+    width:100%;
+    padding:8px;
+    border:none;
+    background:#2d89ef;
+    color:white;
+    border-radius:6px;
+    cursor:pointer;
+}
+</style>
+
+</head>
+<body>
+
+<h1>Gallery Images</h1>
+
+<label>Pilih Folder :</label>
+<select id="folderSelect" onchange="loadImages()">
+<option value="images1">images1</option>
+<option value="images2">images2</option>
+<option value="images3">images3</option>
+</select>
+
+<div class="gallery" id="gallery"></div>
+
+<script>
+
+const baseUrl = "https://the-wedding-me.vercel.app/";
+
+/* daftar gambar per folder */
+const folders = {
+
+images1: [
+"BNZ_2897.JPG",
+"BNZ_2898.JPG",
+"BNZ_2899.JPG"
+],
+
+images2: [
+"BNZ_3001.JPG",
+"BNZ_3002.JPG",
+"BNZ_3003.JPG"
+],
+
+images3: [
+"BNZ_3101.JPG",
+"BNZ_3102.JPG"
+]
+
+};
+
+function loadImages(){
+
+const folder = document.getElementById("folderSelect").value;
+const gallery = document.getElementById("gallery");
+
+gallery.innerHTML = "";
+
+folders[folder].forEach(img => {
+
+const url = baseUrl + folder + "/" + img;
+
+const card = document.createElement("div");
+card.className = "card";
+
+card.innerHTML = `
+<img src="/${folder}/${img}">
+<div class="url">${url}</div>
+<button onclick="copyUrl('${url}')">Copy URL</button>
+`;
+
+gallery.appendChild(card);
+
+});
+
+}
+
+function copyUrl(url){
+
+navigator.clipboard.writeText(url);
+alert("URL berhasil di copy");
+
+}
+
+loadImages();
+
+</script>
+
+</body>
+</html>
